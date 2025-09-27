@@ -17,7 +17,7 @@ services:
   posts_service:
     container_name: posts_service
     build:
-      context: ./post_service
+      context: ./posts_service
     depends_on:
       posts_db:
         condition: service_healthy
@@ -25,6 +25,8 @@ services:
       DB_NAME: ${POSTS_DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: posts_db
+      DB_PORT: 5432
 
   comments_db:
     container_name: comments_db
@@ -44,14 +46,16 @@ services:
   comments_service:
     container_name: comments_service
     build:
-      context: ./comment_service
+      context: ./comments_service
     depends_on:
-      posts_db:
+      comments_db:
         condition: service_healthy
     environment:
       DB_NAME: ${COMMENTS_DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: comments_db
+      DB_PORT: 5432
 
   users_db:
     container_name: users_db
@@ -71,14 +75,45 @@ services:
   users_service:
     container_name: users_service
     build:
-      context: ./user_service
+      context: ./users_service
     depends_on:
-      posts_db:
+      users_db:
         condition: service_healthy
     environment:
       DB_NAME: ${USERS_DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: users_db
+      DB_PORT: 5432
+
+  auth_db:
+    container_name: auth_db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  auth_service:
+    container_name: auth_service
+    build:
+      context: ./auth_service
+    depends_on:
+      auth_db:
+        condition: service_healthy
+    environment:
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: auth_db
+      DB_PORT: 5432
 
 volumes:
   pgdata:
