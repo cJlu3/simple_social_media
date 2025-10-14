@@ -1,91 +1,4 @@
 services:
-  posts_db:
-    container_name: posts_db
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTS_DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-  posts_service:
-    container_name: posts_service
-    build:
-      context: ./posts_service
-    depends_on:
-      posts_db:
-        condition: service_healthy
-    environment:
-      DB_NAME: ${POSTS_DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: posts_db
-      DB_PORT: 5432
-
-  comments_db:
-    container_name: comments_db
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${COMMENTS_DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-  comments_service:
-    container_name: comments_service
-    build:
-      context: ./comments_service
-    depends_on:
-      comments_db:
-        condition: service_healthy
-    environment:
-      DB_NAME: ${COMMENTS_DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: comments_db
-      DB_PORT: 5432
-
-  users_db:
-    container_name: users_db
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${USERS_DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-  users_service:
-    container_name: users_service
-    build:
-      context: ./users_service
-    depends_on:
-      users_db:
-        condition: service_healthy
-    environment:
-      DB_NAME: ${USERS_DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: users_db
-      DB_PORT: 5432
-
   auth_db:
     container_name: auth_db
     image: postgres
@@ -99,13 +12,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-  auth_service:
-    container_name: auth_service
+    # volumes:
+    #   - pgdata:/var/lib/postgresql/data
+  auth_db_api:
+    container_name: auth_db_api
     build:
-      context: ./auth_service
-    depends_on:
+      context: ./auth_db_api
+    depends_on: 
       auth_db:
         condition: service_healthy
     environment:
@@ -114,6 +27,40 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: auth_db
       DB_PORT: 5432
+    ports:
+      - 8001:8000
 
-volumes:
-  pgdata:
+  posts_db:
+    container_name: posts_db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTS_DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # volumes:
+    #   - pgdata:/var/lib/postgresql/data
+  posts_db_api:
+    container_name: posts_db_api
+    build:
+      context: ./posts_db_api
+    depends_on: 
+      posts_db:
+        condition: service_healthy
+    environment:
+      DB_NAME: ${POSTS_DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: posts_db
+      DB_PORT: 5432
+    ports:
+      - 8002:8000
+  
+  
+# volumes:
+#   pgdata:
