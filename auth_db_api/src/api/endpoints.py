@@ -52,7 +52,7 @@ async def get_token_by_id(token_id: int) -> dict:
     data = await TokenService.get(token_id)
     return {"success": True, "data": data}
 
-@app.delete("/api/v1/token_id/{token_id}", response_model=ResponseOK)
+@app.delete("/api/v1/tokens/{token_id}", response_model=ResponseOK)
 async def delete_token_by_id(token_id: int) -> dict:
     await TokenService.delete(token_id=token_id)
     return {"success": True}

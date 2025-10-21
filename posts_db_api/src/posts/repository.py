@@ -1,4 +1,4 @@
-from sqlalchemy import delete, select, func, insert, update
+from sqlalchemy import delete, select, func, insert
 
 from src.core import async_session_factory
 from src.posts.models import Posts
@@ -20,6 +20,13 @@ class PostsRepository:
             res = query_res.scalar_one()
         return res
 
+    @classmethod
+    async def get_comments(cls, post_id: int):
+        query = select(Posts).where(Posts.parent_post_id == post_id)
+        async with async_session_factory() as session:
+            query_res = await session.execute(query)
+            res = query_res.scalars()
+        return res
 
     @classmethod
     async def list(
