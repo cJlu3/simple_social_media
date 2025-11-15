@@ -61,6 +61,6 @@ async def delete_all_posts() -> dict:
     return {"success": True}
 
 @app.delete("/api/v1/posts/{post_id}", response_model=ResponseOK)
-async def delete_token_by_id(post_id: int) -> dict:
+async def delete_post_by_id(post_id: int) -> dict:
     await PostService.delete(post_id=post_id)
     return {"success": True}

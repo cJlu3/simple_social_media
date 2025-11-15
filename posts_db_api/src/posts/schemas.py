@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class PostSchema(BaseModel):
+    id: int
     author_id: int
     parent_post_id: int | None = None
 
@@ -18,7 +19,7 @@ class PostSchema(BaseModel):
     is_visible: bool = True
 
     def to_dict(self) -> dict:
-        return self.model_dump()
+        return self.model_dump(exclude={"id"})
     #
     # def __str__(self) -> str:
     #     line = f"\n\

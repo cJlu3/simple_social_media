@@ -1,12 +1,11 @@
-from datetime import datetime
 from src.auth.repository import TokensRepository
-from src.auth.schemas import TokenSchema
+from src.auth.schemas import TokenCreateSchema, TokenSchema
+
 
 class TokenService:
     @classmethod
-    async def add (cls, token: TokenSchema):
-        token_dict = token.to_dict()
-        await TokensRepository.add(token_dict)
+    async def add(cls, token: TokenCreateSchema):
+        await TokensRepository.add(token.to_dict())
 
     @classmethod
     async def get(cls, token_id: int):
@@ -17,30 +16,10 @@ class TokenService:
     @classmethod
     async def list(
         cls,
-        user_id: int | None = None,
-        refresh_token_hash: str | None = None,
-        issued_at: datetime | None = None,
-        expires_at: datetime | None = None,
-        ip_address: str | None = None,
-        user_agent: str | None = None,
-        is_reboked: bool | None = None,
+        filter: dict,
         limit: int | None = None,
         offset: int | None = None,
     ):
-        filter = {
-            k: v
-            for k, v in {
-                "user_id": user_id,
-                "refresh_token_hash": refresh_token_hash,
-                "issued_at": issued_at,
-                "expires_at": expires_at,
-                "ip_address": ip_address,
-                "user_agent": user_agent,
-                "is_reboked": is_reboked,
-
-            }.items()
-            if v is not None
-        }
         lst = await TokensRepository.list(filter, limit=limit, offset=offset)
         res = []
         for item in lst:

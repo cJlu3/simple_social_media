@@ -1,10 +1,14 @@
-FROM python:3.13-trixie
+FROM python:3.13-slim
 
 WORKDIR /app
 
+# Копируем файлы проекта
 COPY ./src/ ./src/
-COPY ./requirements.txt .
+COPY ./pyproject.toml .
 
-RUN pip install -r requirements.txt
+# Устанавливаем зависимости
+RUN pip install --upgrade pip && \
+    pip install uv && \
+    uv pip install --system -e .
 
-CMD [ "python", "-m", "src.main" ]
+CMD ["python", "-m", "src.main"]

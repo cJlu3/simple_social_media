@@ -1,11 +1,15 @@
 import os
 
 class Settings:
-    DB_NAME = os.environ["DB_NAME"]
-    DB_PASSWORD = os.environ["DB_PASSWORD"]
-    DB_USER = os.environ["DB_USER"]
-    DB_HOST = os.environ["DB_HOST"]
-    DB_PORT = os.environ["DB_PORT"]
-
-    DB_SYNC_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    DB_ASYNC_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # JWT настройки
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+    REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
+    
+    # URL других микросервисов
+    AUTH_DB_API_URL = os.getenv("AUTH_DB_API_URL", "http://auth_db_api:8000")
+    USERS_DB_API_URL = os.getenv("USERS_DB_API_URL", "http://users_db_api:8000")
+    
+    # Настройки для работы с паролями
+    PASSWORD_HASH_ALGORITHM = "bcrypt"

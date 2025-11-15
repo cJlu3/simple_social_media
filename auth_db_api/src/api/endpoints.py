@@ -1,19 +1,20 @@
 from datetime import datetime
 from fastapi import FastAPI
-from src.auth.schemas import TokenSchema
 from src.auth.service import TokenService
+from src.auth.schemas import TokenCreateSchema
 from src.api.schemas import ResponseData, ResponseOK
 
 app = FastAPI()
 
 
 @app.post("/api/v1/tokens", response_model=ResponseOK)
-async def add_token(new_token: TokenSchema) -> dict:
+async def add_token(new_token: TokenCreateSchema) -> dict:
     await TokenService.add(new_token)
     return {"success": True}
 
 @app.get("/api/v1/tokens", response_model=ResponseData)
 async def get_all_tokens(
+    id: int | None = None,
     user_id: int | None = None,
     refresh_token_hash: str | None = None,
     issued_at: datetime | None = None,
@@ -24,14 +25,23 @@ async def get_all_tokens(
     limit: int | None = None,
     offset: int | None = None,
 ) -> dict:
+    filter = {
+        k: v
+        for k, v in {
+            "id": id,
+            "user_id": user_id,
+            "refresh_token_hash": refresh_token_hash,
+            "issued_at": issued_at,
+            "expires_at": expires_at,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "is_reboked": is_reboked,
+
+        }.items()
+        if v is not None
+    }
     data = await TokenService.list(
-        user_id = user_id,
-        refresh_token_hash = refresh_token_hash,
-        issued_at = issued_at,
-        expires_at = expires_at,
-        ip_address = ip_address,
-        user_agent = user_agent,
-        is_reboked = is_reboked,
+        filter=filter,
         limit = limit,
         offset = offset
     )

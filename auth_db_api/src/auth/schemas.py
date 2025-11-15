@@ -1,31 +1,35 @@
-import datetime as dt
+from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class TokenSchema(BaseModel):
-    user_id: int
+    id: int | None
+    user_id: int | None
 
-    refresh_token_hash: str
+    refresh_token_hash: str | None
 
-    issued_at: dt.datetime
-    expires_at: dt.datetime
+    issued_at: datetime | None
+    expires_at: datetime | None
 
     ip_address: str | None
     user_agent: str | None
 
-    is_reboked: bool = Field(default=False)
+    is_reboked: bool | None
+
+    def to_dict(self) -> dict:
+        return self.model_dump(exclude={"id", "expires_at"})
+
+
+class TokenCreateSchema(BaseModel):
+    user_id: int | None
+
+    refresh_token_hash: str | None
+
+    ip_address: str | None
+    user_agent: str | None
+
+    is_reboked: bool | None
 
     def to_dict(self) -> dict:
         return self.model_dump()
-
-    def __str__(self) -> str:
-        line = f"\n\
-            user_id             = {self.user_id}\n\
-            refresh_token_hash  = {self.refresh_token_hash}\n\
-            issued_at           = {self.issued_at}\n\
-            expires_at          = {self.expires_at}\n\
-            ip_address          = {self.ip_address}\n\
-            user_agent          = {self.user_agent}\n\
-            is_reboked          = {self.is_reboked}"
-        return line

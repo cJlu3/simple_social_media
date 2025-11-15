@@ -7,3 +7,5 @@ class ResponseOK(BaseModel):
 class ResponseData(BaseModel):
     success: bool = True
     data: Any
+
+
