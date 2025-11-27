@@ -7,14 +7,14 @@ from src.users.middleware import get_current_user_id
 
 app = FastAPI(
     title="Users Service",
-    description="Сервис для работы с пользователями",
+    description="Service for working with users",
     version="1.0.0"
 )
 
-# CORS настройки
+# CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене указать конкретные домены
+    allow_origins=["*"],  # Specify concrete domains in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,7 +26,7 @@ async def get_user_profile(
     user_id: int,
     current_user_id: Optional[int] = Depends(get_current_user_id)
 ):
-    """Получает профиль пользователя"""
+    """Retrieves a user profile"""
     return await UserService.get_user_profile(user_id, current_user_id)
 
 
@@ -36,7 +36,7 @@ async def update_user_profile(
     user_data: UserUpdateSchema,
     current_user_id: int = Depends(get_current_user_id)
 ):
-    """Обновляет профиль пользователя (только свой профиль)"""
+    """Updates a user profile (only their own profile)"""
     return await UserService.update_profile(user_id, current_user_id, user_data)
 
 
@@ -46,12 +46,12 @@ async def search_users(
     limit: int = 20,
     offset: int = 0
 ):
-    """Поиск пользователей"""
+    """Searches users"""
     return await UserService.search_users(q, limit, offset)
 
 
 @app.get("/health")
 async def health_check():
-    """Проверка здоровья сервиса"""
+    """Service health check"""
     return {"status": "healthy", "service": "users-service"}
 

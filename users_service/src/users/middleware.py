@@ -9,9 +9,9 @@ security = HTTPBearer(auto_error=False)
 
 
 async def get_current_user_id(
-    request: Request, credentials: Optional[HTTPAuthorizationCredentials] = None
+    request: Request, credentials: HTTPAuthorizationCredentials | None = None
 ) -> int:
-    """Извлекает user_id из JWT токена"""
+    """Extracts user_id from the JWT token"""
     token = None
     if credentials:
         token = credentials.credentials
@@ -23,20 +23,20 @@ async def get_current_user_id(
                 if scheme.lower() != "bearer":
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Неверная схема аутентификации",
+                        detail="Invalid authentication scheme",
                         headers={"WWW-Authenticate": "Bearer"},
                     )
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Неверный формат заголовка Authorization",
+                    detail="Invalid Authorization header format",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
 
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен доступа не предоставлен",
+            detail="Access token not provided",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -47,18 +47,18 @@ async def get_current_user_id(
         if payload.get("type") != "access":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный токен",
+                detail="Invalid token",
             )
         user_id = payload.get("user_id")
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный токен",
+                detail="Invalid token",
             )
         return user_id
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Невалидный или истекший токен доступа",
+            detail="Invalid or expired access token",
             headers={"WWW-Authenticate": "Bearer"},
         )

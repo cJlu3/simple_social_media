@@ -5,36 +5,36 @@ from src.authenticator.service import AuthService
 from src.authenticator.schemas import UserInfo
 
 
-# Создаем экземпляр HTTPBearer для извлечения токена из заголовка Authorization
+# Create an HTTPBearer instance to extract tokens from the Authorization header
 security = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = None
+    credentials: HTTPAuthorizationCredentials | None = None
 ) -> UserInfo:
     """
-    Dependency для получения текущего аутентифицированного пользователя
-    
-    Используется в эндпоинтах, которые требуют аутентификации.
-    Извлекает токен из заголовка Authorization и проверяет его.
-    
+    Dependency that returns the currently authenticated user.
+
+    Used in endpoints that require authentication. Extracts the token from
+    the Authorization header and validates it.
+
     Args:
-        request: FastAPI Request объект
-        credentials: Автоматически извлеченные credentials из HTTPBearer
-    
+        request: FastAPI Request object
+        credentials: Automatically extracted credentials from HTTPBearer
+
     Returns:
-        UserInfo с данными пользователя
-    
+        UserInfo with user data
+
     Raises:
-        HTTPException: Если токен отсутствует или невалиден
+        HTTPException: If the token is missing or invalid
     """
-    # Пытаемся получить токен из HTTPBearer
+    # Try to read the token from HTTPBearer
     token = None
     if credentials:
         token = credentials.credentials
     else:
-        # Если HTTPBearer не сработал, пытаемся получить из заголовка напрямую
+        # If HTTPBearer failed, parse the header manually
         authorization = request.headers.get("Authorization")
         if authorization:
             try:
@@ -42,29 +42,29 @@ async def get_current_user(
                 if scheme.lower() != "bearer":
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Неверная схема аутентификации",
+                        detail="Invalid authentication scheme",
                         headers={"WWW-Authenticate": "Bearer"},
                     )
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Неверный формат заголовка Authorization",
+                    detail="Invalid Authorization header format",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
     
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен доступа не предоставлен",
+            detail="Access token not provided",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Проверяем токен
+    # Validate the token
     user_info = AuthService.verify_access_token(token)
     if not user_info:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Невалидный или истекший токен доступа",
+            detail="Invalid or expired access token",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -73,20 +73,20 @@ async def get_current_user(
 
 async def get_current_user_optional(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = None
+    credentials: HTTPAuthorizationCredentials | None = None
 ) -> Optional[UserInfo]:
     """
-    Dependency для получения текущего пользователя (опционально)
-    
-    Используется в эндпоинтах, где аутентификация не обязательна,
-    но если пользователь аутентифицирован, мы можем использовать его данные.
-    
+    Dependency that returns the current user when available.
+
+    Useful for endpoints where authentication is optional but user data is
+    desirable if present.
+
     Args:
-        request: FastAPI Request объект
-        credentials: Автоматически извлеченные credentials из HTTPBearer
-    
+        request: FastAPI Request object
+        credentials: Automatically extracted credentials from HTTPBearer
+
     Returns:
-        UserInfo или None, если пользователь не аутентифицирован
+        UserInfo or None if the user is not authenticated
     """
     try:
         return await get_current_user(request, credentials)

@@ -2,11 +2,11 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-# Копируем файлы проекта
+# Copy project files
 COPY ./src/ ./src/
 COPY ./pyproject.toml .
 
-# Устанавливаем зависимости
+# Install dependencies
 RUN pip install --upgrade pip && \
     pip install uv && \
     uv pip install --system -e .

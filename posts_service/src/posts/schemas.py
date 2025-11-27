@@ -4,41 +4,41 @@ from pydantic import BaseModel, Field
 
 
 class PostCreateSchema(BaseModel):
-    """Схема для создания поста"""
+    """Schema for creating a post"""
 
     header: str = Field(
-        ..., min_length=1, max_length=255, description="Заголовок поста"
+        ..., min_length=1, max_length=255, description="Post title"
     )
-    content: str = Field(default="", max_length=10000, description="Содержимое поста")
-    tags: List[str] = Field(default=[], description="Теги поста")
+    content: str = Field(default="", max_length=10000, description="Post content")
+    tags: List[str] = Field(default=[], description="Post tags")
     media: Optional[List[str]] = Field(
-        default=None, description="Ссылки на медиа файлы"
+        default=None, description="Links to media files"
     )
     parent_post_id: Optional[int] = Field(
-        default=None, description="ID родительского поста (для комментариев)"
+        default=None, description="Parent post ID (for comments)"
     )
 
 
 class PostUpdateSchema(BaseModel):
-    """Схема для обновления поста"""
+    """Schema for updating a post"""
 
     header: Optional[str] = Field(None, min_length=1, max_length=255)
     content: Optional[str] = Field(None, max_length=10000)
-    tags: Optional[List[str]] = None
-    media: Optional[List[str]] = None
-    is_visible: Optional[bool] = None
+    tags: List[str] | None = None
+    media: List[str] | None = None
+    is_visible: bool | None = None
 
 
 class PostSchema(BaseModel):
-    """Схема поста для ответа"""
+    """Post schema for responses"""
 
     id: int
     author_id: int
-    parent_post_id: Optional[int] = None
+    parent_post_id: int | None = None
     header: str
     content: str
     tags: List[str]
-    media: Optional[List[str]] = None
+    media: List[str] | None = None
     created_at: datetime
     is_deleted: bool
     is_visible: bool
@@ -50,12 +50,12 @@ class PostSchema(BaseModel):
 
 
 class CommentCreateSchema(BaseModel):
-    """Схема для создания комментария"""
+    """Schema for creating a comment"""
 
     content: str = Field(
-        ..., min_length=1, max_length=10000, description="Содержимое комментария"
+        ..., min_length=1, max_length=10000, description="Comment content"
     )
-    tags: List[str] = Field(default=[], description="Теги комментария")
+    tags: List[str] = Field(default=[], description="Comment tags")
     media: Optional[List[str]] = Field(
-        default=None, description="Ссылки на медиа файлы"
+        default=None, description="Links to media files"
     )

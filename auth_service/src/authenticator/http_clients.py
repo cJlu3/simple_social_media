@@ -4,20 +4,20 @@ from src.config import Settings
 
 
 class UsersDBClient:
-    """HTTP клиент для работы с users_db_api"""
+    """HTTP client for interacting with users_db_api"""
 
     BASE_URL = Settings.USERS_DB_API_URL
 
     @staticmethod
     async def create_user(user_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Создает нового пользователя
+        Creates a new user
 
         Args:
-            user_data: Данные пользователя (username, email, password_hash и т.д.)
+            user_data: User payload (username, email, password_hash, etc.)
 
         Returns:
-            Ответ от API с данными созданного пользователя
+            API response containing the created user
         """
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -29,13 +29,13 @@ class UsersDBClient:
     @staticmethod
     async def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
         """
-        Получает пользователя по ID
+        Retrieves a user by ID
 
         Args:
-            user_id: ID пользователя
+            user_id: User ID
 
         Returns:
-            Данные пользователя или None, если не найден
+            User data or None if not found
         """
         async with httpx.AsyncClient() as client:
             try:
@@ -51,13 +51,13 @@ class UsersDBClient:
     @staticmethod
     async def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
         """
-        Получает пользователя по email
+        Retrieves a user by email
 
         Args:
-            email: Email пользователя
+            email: User email
 
         Returns:
-            Данные пользователя или None, если не найден
+            User data or None if not found
         """
         async with httpx.AsyncClient() as client:
             try:
@@ -78,13 +78,13 @@ class UsersDBClient:
     @staticmethod
     async def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
         """
-        Получает пользователя по username
+        Retrieves a user by username
 
         Args:
-            username: Имя пользователя
+            username: Username
 
         Returns:
-            Данные пользователя или None, если не найден
+            User data or None if not found
         """
         async with httpx.AsyncClient() as client:
             try:
@@ -105,40 +105,40 @@ class UsersDBClient:
     @staticmethod
     async def update_user(user_id: int, user_data: Dict[str, Any]) -> bool:
         """
-        Обновляет данные пользователя (например, password_hash)
+        Updates user data (e.g., password_hash)
 
         Args:
-            user_id: ID пользователя
-            user_data: Новые данные
+            user_id: User ID
+            user_data: New data
 
         Returns:
-            True, если обновление успешно
+            True if the update succeeded
         """
         async with httpx.AsyncClient() as client:
             try:
-                # Поскольку в users_db_api нет PUT эндпоинта,
-                # мы можем использовать существующие методы или добавить его позже
-                # Пока что возвращаем False
+                # users_db_api has no PUT endpoint yet,
+                # so we need to extend the API or reuse existing methods later
+                # Returning False for now
                 return False
             except httpx.HTTPStatusError:
                 return False
 
 
 class AuthDBClient:
-    """HTTP клиент для работы с auth_db_api"""
+    """HTTP client for interacting with auth_db_api"""
 
     BASE_URL = Settings.AUTH_DB_API_URL
 
     @staticmethod
     async def create_token(token_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Сохраняет refresh token в базе данных
+        Persists a refresh token in the database
 
         Args:
-            token_data: Данные токена (user_id, refresh_token_hash, ip_address, user_agent)
+            token_data: Token payload (user_id, refresh_token_hash, ip_address, user_agent)
 
         Returns:
-            Ответ от API
+            API response
         """
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -150,13 +150,13 @@ class AuthDBClient:
     @staticmethod
     async def get_tokens_by_user_id(user_id: int) -> List[Dict[str, Any]]:
         """
-        Получает все токены пользователя
+        Retrieves all tokens for a user
 
         Args:
-            user_id: ID пользователя
+            user_id: User ID
 
         Returns:
-            Список токенов
+            List of token records
         """
         async with httpx.AsyncClient() as client:
             try:
@@ -174,13 +174,13 @@ class AuthDBClient:
     @staticmethod
     async def revoke_token(token_id: int) -> bool:
         """
-        Отзывает токен (помечает как is_reboked=True)
+        Revokes a token (marks it as is_revoked=True)
 
         Args:
-            token_id: ID токена
+            token_id: Token ID
 
         Returns:
-            True, если успешно
+            True if the operation succeeded
         """
         async with httpx.AsyncClient() as client:
             try:
@@ -195,13 +195,13 @@ class AuthDBClient:
     @staticmethod
     async def find_token_by_hash(refresh_token_hash: str) -> Optional[Dict[str, Any]]:
         """
-        Находит токен по хешу refresh token
+        Finds a token by its refresh token hash
 
         Args:
-            refresh_token_hash: Хеш refresh token
+            refresh_token_hash: Refresh token hash
 
         Returns:
-            Данные токена или None
+            Token data or None
         """
         async with httpx.AsyncClient() as client:
             try:

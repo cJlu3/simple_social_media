@@ -1,0 +1,130 @@
+version: "3.9"
+
+services:
+  bastion:
+    build:
+      context: ./infra/remote-host
+    container_name: bastion
+    hostname: bastion
+    ports:
+      - "2222:22"
+    networks:
+      - dmz
+      - services_net
+    volumes:
+      - bastion_home:/home/dev
+    labels:
+      traefik.enable: "false"
+
+  auth_db_host:
+    build:
+      context: ./infra/remote-host
+    container_name: auth_db_host
+    hostname: auth-db-host
+    ports:
+      - "2223:22"
+    networks:
+      - auth_data_net
+    volumes:
+      - auth_db_srv:/srv
+    labels:
+      role: "db"
+
+  posts_db_host:
+    build:
+      context: ./infra/remote-host
+    container_name: posts_db_host
+    hostname: posts-db-host
+    ports:
+      - "2224:22"
+    networks:
+      - posts_data_net
+    volumes:
+      - posts_db_srv:/srv
+    labels:
+      role: "db"
+
+  users_db_host:
+    build:
+      context: ./infra/remote-host
+    container_name: users_db_host
+    hostname: users-db-host
+    ports:
+      - "2225:22"
+    networks:
+      - users_data_net
+    volumes:
+      - users_db_srv:/srv
+    labels:
+      role: "db"
+
+  auth_service_host:
+    build:
+      context: ./infra/remote-host
+    container_name: auth_service_host
+    hostname: auth-service-host
+    ports:
+      - "2226:22"
+    networks:
+      - services_net
+      - auth_data_net
+      - users_data_net
+    volumes:
+      - auth_service_srv:/srv
+    labels:
+      role: "service"
+
+  posts_service_host:
+    build:
+      context: ./infra/remote-host
+    container_name: posts_service_host
+    hostname: posts-service-host
+    ports:
+      - "2227:22"
+    networks:
+      - services_net
+      - posts_data_net
+      - auth_data_net
+      - users_data_net
+    volumes:
+      - posts_service_srv:/srv
+    labels:
+      role: "service"
+
+  users_service_host:
+    build:
+      context: ./infra/remote-host
+    container_name: users_service_host
+    hostname: users-service-host
+    ports:
+      - "2228:22"
+    networks:
+      - services_net
+      - users_data_net
+      - auth_data_net
+    volumes:
+      - users_service_srv:/srv
+    labels:
+      role: "service"
+
+networks:
+  dmz:
+    driver: bridge
+  services_net:
+    driver: bridge
+  auth_data_net:
+    driver: bridge
+  posts_data_net:
+    driver: bridge
+  users_data_net:
+    driver: bridge
+
+volumes:
+  bastion_home:
+  auth_db_srv:
+  posts_db_srv:
+  users_db_srv:
+  auth_service_srv:
+  posts_service_srv:
+  users_service_srv:
+

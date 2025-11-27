@@ -6,14 +6,14 @@ from src.authenticator.middleware import get_current_user, get_current_user_opti
 
 app = FastAPI(
     title="Auth Service",
-    description="Сервис аутентификации для социальной сети",
+    description="Authentication service for the social network",
     version="1.0.0"
 )
 
-# CORS настройки
+# CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене указать конкретные домены
+    allow_origins=["*"],  # Specify explicit domains in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,8 +21,8 @@ app.add_middleware(
 
 
 def get_client_ip(request: Request) -> str:
-    """Извлекает IP адрес клиента из запроса"""
-    # Проверяем заголовки прокси
+    """Extracts the client's IP address from the request"""
+    # Check proxy headers
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
@@ -31,7 +31,7 @@ def get_client_ip(request: Request) -> str:
     if real_ip:
         return real_ip
     
-    # Если нет заголовков прокси, используем прямой IP
+    # Fallback to the direct client IP
     if request.client:
         return request.client.host
     
@@ -39,7 +39,7 @@ def get_client_ip(request: Request) -> str:
 
 
 def get_user_agent(request: Request) -> str:
-    """Извлекает User-Agent из запроса"""
+    """Extracts the User-Agent from the request"""
     return request.headers.get("User-Agent", "unknown")
 
 
@@ -49,20 +49,20 @@ async def register(
     request: Request
 ):
     """
-    Регистрация нового пользователя
-    
-    Создает нового пользователя в системе и возвращает токены доступа.
-    Пароль хешируется с использованием bcrypt перед сохранением.
-    
+    Register a new user.
+
+    Creates a user account and returns access credentials.
+    The password is hashed with bcrypt before persistence.
+
     Args:
-        user_data: Данные для регистрации (username, email, password)
-        request: FastAPI Request для получения IP и User-Agent
-    
+        user_data: Registration payload (username, email, password)
+        request: FastAPI Request to capture IP and User-Agent
+
     Returns:
-        TokenResponse с access и refresh токенами
-    
+        TokenResponse with access and refresh tokens
+
     Raises:
-        HTTPException: Если пользователь уже существует
+        HTTPException: If the user already exists
     """
     ip_address = get_client_ip(request)
     user_agent = get_user_agent(request)
@@ -75,7 +75,7 @@ async def register(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ошибка при регистрации: {str(e)}"
+            detail=f"Registration error: {str(e)}"
         )
 
 
@@ -85,20 +85,20 @@ async def login(
     request: Request
 ):
     """
-    Вход пользователя в систему
-    
-    Проверяет учетные данные пользователя и возвращает токены доступа.
-    Можно использовать email или username для входа.
-    
+    User login endpoint.
+
+    Validates credentials and issues tokens.
+    Users can provide either email or username.
+
     Args:
-        login_data: Данные для входа (login - email или username, password)
-        request: FastAPI Request для получения IP и User-Agent
-    
+        login_data: Login payload (email/username and password)
+        request: FastAPI Request to capture IP and User-Agent
+
     Returns:
-        TokenResponse с access и refresh токенами
-    
+        TokenResponse with access and refresh tokens
+
     Raises:
-        HTTPException: Если неверные учетные данные
+        HTTPException: If credentials are invalid
     """
     ip_address = get_client_ip(request)
     user_agent = get_user_agent(request)
@@ -111,7 +111,7 @@ async def login(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ошибка при входе: {str(e)}"
+            detail=f"Login error: {str(e)}"
         )
 
 
@@ -120,19 +120,19 @@ async def refresh_token(
     token_data: RefreshTokenSchema
 ):
     """
-    Обновление access token
-    
-    Использует refresh token для получения новых access и refresh токенов.
-    Старый refresh token отзывается.
-    
+    Refresh an access token.
+
+    Exchanges a refresh token for new access/refresh token pair.
+    The old refresh token is revoked.
+
     Args:
-        token_data: Refresh token для обновления
-    
+        token_data: Refresh token payload
+
     Returns:
-        TokenResponse с новыми access и refresh токенами
-    
+        TokenResponse containing new tokens
+
     Raises:
-        HTTPException: Если refresh token невалиден или отозван
+        HTTPException: If the refresh token is invalid or revoked
     """
     try:
         tokens = await AuthService.refresh_token(token_data.refresh_token)
@@ -142,7 +142,7 @@ async def refresh_token(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ошибка при обновлении токена: {str(e)}"
+            detail=f"Token refresh error: {str(e)}"
         )
 
 
@@ -151,24 +151,24 @@ async def logout(
     token_data: RefreshTokenSchema
 ):
     """
-    Выход пользователя из системы
-    
-    Отзывает refresh token, делая его недействительным.
-    Access token остается валидным до истечения срока действия.
-    
+    Log a user out.
+
+    Revokes the refresh token, rendering it invalid.
+    The access token remains valid until expiry.
+
     Args:
-        token_data: Refresh token для отзыва
-    
+        token_data: Refresh token to revoke
+
     Returns:
-        Сообщение об успешном выходе
+        Success message
     """
     try:
         await AuthService.logout(token_data.refresh_token)
-        return {"success": True, "message": "Выход выполнен успешно"}
+        return {"success": True, "message": "Logout completed successfully"}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ошибка при выходе: {str(e)}"
+            detail=f"Logout error: {str(e)}"
         )
 
 
@@ -177,16 +177,15 @@ async def get_current_user_info(
     current_user: UserInfo = Depends(get_current_user)
 ):
     """
-    Получение информации о текущем пользователе
-    
-    Возвращает информацию о пользователе на основе access token.
-    Требует аутентификации.
-    
+    Retrieve information about the current user.
+
+    Requires authentication via access token.
+
     Args:
-        current_user: Текущий пользователь (из middleware)
-    
+        current_user: UserInfo provided by middleware
+
     Returns:
-        Информация о пользователе
+        User data payload
     """
     return {
         "success": True,
@@ -202,6 +201,6 @@ async def get_current_user_info(
 
 @app.get("/health")
 async def health_check():
-    """Проверка здоровья сервиса"""
+    """Service health check"""
     return {"status": "healthy", "service": "auth-service"}
 

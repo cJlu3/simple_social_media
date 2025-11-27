@@ -9,64 +9,62 @@ from src.authenticator.http_clients import UsersDBClient, AuthDBClient
 
 
 class AuthService:
-    """Основной сервис аутентификации"""
+    """Primary authentication service"""
     
     @staticmethod
     def _hash_refresh_token(token: str) -> str:
         """
-        Создает хеш из refresh token для безопасного хранения в БД
+        Creates a hash from a refresh token for safe storage
         
         Args:
             token: Refresh token
         
         Returns:
-            SHA256 хеш токена
+            SHA256 hash of the token
         """
         return hashlib.sha256(token.encode()).hexdigest()
     
     @staticmethod
-    async def register(user_data: RegisterSchema, ip_address: Optional[str] = None, 
-                      user_agent: Optional[str] = None) -> TokenResponse:
+    async def register(user_data: RegisterSchema, ip_address: str | None = None, 
+                      user_agent: str | None = None) -> TokenResponse:
         """
-        Регистрирует нового пользователя и возвращает токены
+        Registers a new user and returns tokens
         
         Args:
-            user_data: Данные для регистрации (username, email, password)
-            ip_address: IP адрес клиента
-            user_agent: User-Agent браузера
+            user_data: Registration payload (username, email, password)
+            ip_address: Client IP address
+            user_agent: Browser User-Agent
         
         Returns:
-            TokenResponse с access и refresh токенами
+            TokenResponse with access and refresh tokens
         
         Raises:
-            HTTPException: Если пользователь уже существует
+            HTTPException: If the user already exists
         """
-        # Проверяем, не существует ли уже пользователь с таким email
+        # Ensure there is no existing user with this email
         existing_user_by_email = await UsersDBClient.get_user_by_email(user_data.email)
         if existing_user_by_email:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Пользователь с таким email уже существует"
+                detail="A user with this email already exists"
             )
         
-        # Проверяем, не существует ли уже пользователь с таким username
+        # Ensure the username is unique
         existing_user_by_username = await UsersDBClient.get_user_by_username(user_data.username)
         if existing_user_by_username:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Пользователь с таким username уже существует"
+                detail="A user with this username already exists"
             )
         
-        # Хешируем пароль
+        # Hash the password
         password_hash = PasswordService.hash_password(user_data.password)
         
-        # Создаем пользователя в базе данных
-        # ВАЖНО: Нужно добавить поле password_hash в модель Users в users_db_api
-        # Пока что создаем пользователя без пароля, пароль нужно будет добавить отдельно
+        # Create a user in the database
         user_dict = {
             "username": user_data.username,
             "email": user_data.email,
-            "password_hash": password_hash,  # Это поле нужно добавить в Users модель
+            "password_hash": password_hash,  # This field has to exist in the Users model
             "created_at": datetime.now(timezone.utc).isoformat(),
             "is_verified": False,
             "is_admin": False
@@ -74,22 +72,22 @@ class AuthService:
         
         try:
             result = await UsersDBClient.create_user(user_dict)
-            # Получаем созданного пользователя по email для получения ID
+            # Fetch the newly created user by email to get its ID
             new_user = await UsersDBClient.get_user_by_email(user_data.email)
             if not new_user:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Ошибка при создании пользователя"
+                    detail="Error while creating user"
                 )
             
             user_id = new_user["id"]
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Ошибка при создании пользователя: {str(e)}"
+                detail=f"Error while creating user: {str(e)}"
             )
         
-        # Создаем токены
+        # Issue tokens
         token_data = {
             "user_id": user_id,
             "username": user_data.username,
@@ -101,7 +99,7 @@ class AuthService:
         access_token = JWTService.create_access_token(token_data)
         refresh_token = JWTService.create_refresh_token(token_data)
         
-        # Сохраняем refresh token в базе данных
+        # Persist the refresh token in the database
         refresh_token_hash = AuthService._hash_refresh_token(refresh_token)
         token_db_data = {
             "user_id": user_id,
@@ -114,7 +112,7 @@ class AuthService:
         try:
             await AuthDBClient.create_token(token_db_data)
         except Exception as e:
-            # Если не удалось сохранить токен, это не критично, но логируем
+            # Not critical if saving fails, but log it
             print(f"Warning: Failed to save refresh token: {str(e)}")
         
         return TokenResponse(
@@ -124,26 +122,26 @@ class AuthService:
         )
     
     @staticmethod
-    async def login(login_data: LoginSchema, ip_address: Optional[str] = None,
-                   user_agent: Optional[str] = None) -> TokenResponse:
+    async def login(login_data: LoginSchema, ip_address: str | None = None,
+                   user_agent: str | None = None) -> TokenResponse:
         """
-        Выполняет вход пользователя и возвращает токены
+        Authenticates a user and returns tokens
         
         Args:
-            login_data: Данные для входа (login - email или username, password)
-            ip_address: IP адрес клиента
-            user_agent: User-Agent браузера
+            login_data: Login payload (email or username, password)
+            ip_address: Client IP address
+            user_agent: Browser User-Agent
         
         Returns:
-            TokenResponse с access и refresh токенами
+            TokenResponse with access and refresh tokens
         
         Raises:
-            HTTPException: Если неверные учетные данные
+            HTTPException: If credentials are invalid
         """
-        # Пытаемся найти пользователя по email или username
+        # Attempt to find the user by email or username
         user = None
         
-        # Проверяем, является ли login email (содержит @)
+        # Determine whether the login is an email (contains @)
         if "@" in login_data.login:
             user = await UsersDBClient.get_user_by_email(login_data.login)
         else:
@@ -152,26 +150,26 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Неверный email/username или пароль"
+                detail="Invalid email/username or password"
             )
         
-        # Проверяем пароль
-        # ВАЖНО: Нужно получить password_hash из модели Users
-        # Пока что проверяем наличие поля password_hash
+        # Validate the password
+        # IMPORTANT: ensure password_hash exists in the Users model
+        # For now, just check for the field
         password_hash = user.get("password_hash")
         if not password_hash:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Пароль не установлен для пользователя"
+                detail="Password is not set for this user"
             )
         
         if not PasswordService.verify_password(login_data.password, password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Неверный email/username или пароль"
+                detail="Invalid email/username or password"
             )
         
-        # Создаем токены
+        # Issue tokens
         token_data = {
             "user_id": user["id"],
             "username": user["username"],
@@ -183,7 +181,7 @@ class AuthService:
         access_token = JWTService.create_access_token(token_data)
         refresh_token = JWTService.create_refresh_token(token_data)
         
-        # Сохраняем refresh token в базе данных
+        # Persist the refresh token
         refresh_token_hash = AuthService._hash_refresh_token(refresh_token)
         token_db_data = {
             "user_id": user["id"],
@@ -207,51 +205,51 @@ class AuthService:
     @staticmethod
     async def refresh_token(refresh_token: str) -> TokenResponse:
         """
-        Обновляет access token используя refresh token
+        Refreshes an access token using a refresh token
         
         Args:
             refresh_token: Refresh token
         
         Returns:
-            TokenResponse с новыми токенами
+            TokenResponse with new tokens
         
         Raises:
-            HTTPException: Если refresh token невалиден
+            HTTPException: If the refresh token is invalid
         """
-        # Проверяем refresh token
+        # Validate the refresh token
         payload = JWTService.verify_token(refresh_token, token_type="refresh")
         if not payload:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный refresh token"
+                detail="Invalid refresh token"
             )
         
         user_id = payload.get("user_id")
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный refresh token"
+                detail="Invalid refresh token"
             )
         
-        # Проверяем, не отозван ли токен в базе данных
+        # Ensure the token has not been revoked
         refresh_token_hash = AuthService._hash_refresh_token(refresh_token)
         token_in_db = await AuthDBClient.find_token_by_hash(refresh_token_hash)
         
         if not token_in_db or token_in_db.get("is_reboked", False):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token был отозван"
+                detail="Refresh token has been revoked"
             )
         
-        # Получаем актуальные данные пользователя
+        # Fetch up-to-date user data
         user = await UsersDBClient.get_user_by_id(user_id)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Пользователь не найден"
+                detail="User not found"
             )
         
-        # Создаем новые токены
+        # Issue new tokens
         token_data = {
             "user_id": user["id"],
             "username": user["username"],
@@ -263,7 +261,7 @@ class AuthService:
         access_token = JWTService.create_access_token(token_data)
         new_refresh_token = JWTService.create_refresh_token(token_data)
         
-        # Сохраняем новый refresh token
+        # Persist the new refresh token
         new_refresh_token_hash = AuthService._hash_refresh_token(new_refresh_token)
         token_db_data = {
             "user_id": user["id"],
@@ -275,7 +273,7 @@ class AuthService:
         
         try:
             await AuthDBClient.create_token(token_db_data)
-            # Отзываем старый токен
+            # Revoke the previous token
             await AuthDBClient.revoke_token(token_in_db["id"])
         except Exception as e:
             print(f"Warning: Failed to update refresh token: {str(e)}")
@@ -289,13 +287,13 @@ class AuthService:
     @staticmethod
     async def logout(refresh_token: str) -> bool:
         """
-        Выполняет выход пользователя (отзывает refresh token)
+        Logs a user out (revokes the refresh token)
         
         Args:
-            refresh_token: Refresh token для отзыва
+            refresh_token: Refresh token to revoke
         
         Returns:
-            True, если выход успешен
+            True if successful
         """
         refresh_token_hash = AuthService._hash_refresh_token(refresh_token)
         token_in_db = await AuthDBClient.find_token_by_hash(refresh_token_hash)
@@ -308,13 +306,13 @@ class AuthService:
     @staticmethod
     def verify_access_token(token: str) -> Optional[UserInfo]:
         """
-        Проверяет access token и возвращает информацию о пользователе
+        Validates an access token and returns user info
         
         Args:
             token: Access token
         
         Returns:
-            UserInfo или None, если токен невалиден
+            UserInfo or None if the token is invalid
         """
         payload = JWTService.verify_token(token, token_type="access")
         if not payload:

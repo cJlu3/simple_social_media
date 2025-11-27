@@ -3,40 +3,40 @@ from typing import Optional
 
 
 class RegisterSchema(BaseModel):
-    """Схема для регистрации нового пользователя"""
-    username: str = Field(..., min_length=3, max_length=50, description="Имя пользователя")
-    email: EmailStr = Field(..., description="Email адрес")
-    password: str = Field(..., min_length=8, max_length=100, description="Пароль (минимум 8 символов)")
+    """Schema for registering a new user"""
+    username: str = Field(..., min_length=3, max_length=50, description="Username")
+    email: EmailStr = Field(..., description="Email address")
+    password: str = Field(..., min_length=8, max_length=100, description="Password (minimum 8 characters)")
     
     @field_validator('username')
     @classmethod
     def validate_username(cls, v: str) -> str:
-        """Проверка, что username содержит только буквы, цифры и подчеркивания"""
+        """Ensure username only contains letters, digits, hyphens, or underscores"""
         if not v.replace('_', '').replace('-', '').isalnum():
-            raise ValueError('Username может содержать только буквы, цифры, дефисы и подчеркивания')
+            raise ValueError('Username may only contain letters, digits, hyphens, and underscores')
         return v
 
 
 class LoginSchema(BaseModel):
-    """Схема для входа пользователя (можно использовать email или username)"""
-    login: str = Field(..., description="Email или username")
-    password: str = Field(..., description="Пароль")
+    """Schema for user login (email or username)"""
+    login: str = Field(..., description="Email or username")
+    password: str = Field(..., description="Password")
 
 
 class TokenResponse(BaseModel):
-    """Схема ответа с токенами доступа"""
+    """Response schema with access credentials"""
     access_token: str = Field(..., description="JWT access token")
     refresh_token: str = Field(..., description="JWT refresh token")
-    token_type: str = Field(default="bearer", description="Тип токена")
+    token_type: str = Field(default="bearer", description="Token type")
 
 
 class RefreshTokenSchema(BaseModel):
-    """Схема для обновления токена"""
-    refresh_token: str = Field(..., description="Refresh token для обновления")
+    """Schema for refreshing tokens"""
+    refresh_token: str = Field(..., description="Refresh token to exchange")
 
 
 class UserInfo(BaseModel):
-    """Информация о пользователе из токена"""
+    """User information extracted from a token"""
     user_id: int
     username: str
     email: str

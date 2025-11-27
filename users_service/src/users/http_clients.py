@@ -4,13 +4,13 @@ from src.config import Settings
 
 
 class UsersDBClient:
-    """HTTP клиент для работы с users_db_api"""
+    """HTTP client for interacting with users_db_api"""
 
     BASE_URL = Settings.USERS_DB_API_URL
 
     @staticmethod
     async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
-        """Получает пользователя по ID"""
+        """Retrieves a user by ID"""
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(
@@ -24,19 +24,19 @@ class UsersDBClient:
 
     @staticmethod
     async def update_user(user_id: int, user_data: Dict[str, Any]) -> bool:
-        """Обновляет данные пользователя"""
-        # Пока что users_db_api не имеет PUT эндпоинта
-        # Нужно будет добавить его позже
+        """Updates user data"""
+        # users_db_api does not expose a PUT endpoint yet
+        # Need to add it later
         return False
 
     @staticmethod
     async def search_users(
         query: str, limit: int = 20, offset: int = 0
     ) -> List[Dict[str, Any]]:
-        """Поиск пользователей по username или email"""
+        """Searches users by username or email"""
         async with httpx.AsyncClient() as client:
             try:
-                # Поиск по username
+                # Search by username
                 response = await client.get(
                     f"{UsersDBClient.BASE_URL}/api/v1/users",
                     params={"username": query, "limit": limit, "offset": offset},

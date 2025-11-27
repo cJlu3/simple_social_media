@@ -16,7 +16,7 @@ class Users(Base):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password_hash: Mapped[str | None] = mapped_column(
         nullable=True
-    )  # Хеш пароля для аутентификации
+    )  # Password hash used for authentication
 
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),

@@ -1,228 +1,228 @@
 # Simple Social Media (X/Twitter Clone)
 
-Проект представляет собой микросервисную социальную сеть, похожую на X (Twitter).
+This project is a microservice-based social network inspired by X (Twitter).
 
-## Архитектура проекта
+## Project Architecture
 
-Проект использует микросервисную архитектуру:
+The system is composed of multiple services:
 
-- **auth_db_api** - API для работы с токенами и аутентификацией
-- **posts_db_api** - API для работы с постами
-- **users_db_api** - API для работы с пользователями
-- **auth_service** - Сервис аутентификации (JWT, регистрация, вход)
-- **posts_service** - Бизнес-логика для постов
-- **users_service** - Бизнес-логика для пользователей
+- **auth_db_api** – token storage API (refresh tokens, metadata)
+- **posts_db_api** – CRUD API for posts
+- **users_db_api** – CRUD API for user profiles
+- **auth_service** – authentication service (JWT, registration, login)
+- **posts_service** – post-related business logic
+- **users_service** – user-related business logic
 
-## План разработки
+## Roadmap
 
-### ✅ 1. Инфраструктура и база данных
+### ✅ 1. Infrastructure & Databases
 
-#### ✅ 1.1. Структура проекта
+#### ✅ 1.1. Project structure
 
-- [x] Создание структуры папок для микросервисов
-- [x] Настройка Docker для auth_db_api
-- [x] Настройка Docker для posts_db_api
-- [x] Настройка Docker для users_db_api
-- [x] Настройка Docker для всех сервисов
-- [x] Полная настройка docker-compose.yml
+- [x] Create the microservice folder layout
+- [x] Configure Docker for auth_db_api
+- [x] Configure Docker for posts_db_api
+- [x] Configure Docker for users_db_api
+- [x] Provide Dockerfiles for every service
+- [x] Fully configure `docker-compose.yml`
 
-#### ✅ 1.2. Модели данных
+#### ✅ 1.2. Data models
 
-- [x] Модель Users (id, username, email, avatar_url, created_at, is_verified, is_admin, password_hash)
-- [x] Модель Posts (id, author_id, parent_post_id, header, content, tags, media, created_at, is_deleted, is_visible)
-- [x] Модель Tokens (id, user_id, refresh_token_hash, issued_at, expires_at, ip_address, user_agent, is_reboked)
-- [x] Модель Likes (user_id, post_id)
-- [x] Модель Reposts (user_id, post_id)
-- [x] Модель Follows (follower_id, following_id)
+- [x] Users model (id, username, email, avatar_url, created_at, is_verified, is_admin, password_hash)
+- [x] Posts model (id, author_id, parent_post_id, header, content, tags, media, created_at, is_deleted, is_visible)
+- [x] Tokens model (id, user_id, refresh_token_hash, issued_at, expires_at, ip_address, user_agent, is_reboked)
+- [x] Likes model (user_id, post_id)
+- [x] Reposts model (user_id, post_id)
+- [x] Follows model (follower_id, following_id)
 
-### ✅ 2. Database APIs (CRUD операции)
+### ✅ 2. Database APIs (CRUD)
 
 #### ✅ 2.1. Auth DB API
 
-- [x] Репозиторий TokensRepository (add, get, list, count, delete, delete_all)
-- [x] Сервис TokenService
-- [x] Эндпоинты для токенов (POST, GET, DELETE)
-- [x] Схемы TokenSchema, TokenCreateSchema
+- [x] TokensRepository (add, get, list, count, delete, delete_all)
+- [x] TokenService
+- [x] Token endpoints (POST, GET, DELETE)
+- [x] TokenSchema & TokenCreateSchema
 
 #### ✅ 2.2. Posts DB API
 
-- [x] Репозиторий PostsRepository (add, get, list, count, delete, delete_all, get_comments)
-- [x] Сервис PostService
-- [x] Эндпоинты для постов (POST, GET, DELETE, GET comments)
-- [x] Схемы PostSchema
+- [x] PostsRepository (add, get, list, count, delete, delete_all, get_comments)
+- [x] PostService
+- [x] Post endpoints (POST, GET, DELETE, GET comments)
+- [x] PostSchema
 
 #### ✅ 2.3. Users DB API
 
-- [x] Репозиторий UsersRepository (add, get, list, count, delete, delete_all)
-- [x] Сервис UserService
-- [x] Эндпоинты для пользователей (POST, GET, DELETE)
-- [x] Схемы UserSchema
+- [x] UsersRepository (add, get, list, count, delete, delete_all)
+- [x] UserService
+- [x] User endpoints (POST, GET, DELETE)
+- [x] UserSchema
 
-### ⏳ 3. Бизнес-логика сервисов
+### ⏳ 3. Service Business Logic
 
 #### ✅ 3.1. Auth Service
 
-- [x] Реализация JWT токенов (access + refresh)
-- [x] Хеширование паролей (bcrypt)
-- [x] Регистрация пользователя (POST /register)
-- [x] Вход пользователя (POST /login)
-- [x] Обновление токена (POST /refresh)
-- [x] Выход пользователя (POST /logout)
-- [x] Валидация токенов
-- [x] Middleware для проверки аутентификации
-- [x] Интеграция с auth_db_api и users_db_api
+- [x] JWT tokens (access + refresh)
+- [x] Password hashing (bcrypt)
+- [x] Registration (POST /register)
+- [x] Login (POST /login)
+- [x] Token refresh (POST /refresh)
+- [x] Logout (POST /logout)
+- [x] Token validation
+- [x] Authentication middleware
+- [x] Integration with auth_db_api & users_db_api
 
 #### ✅ 3.2. Posts Service
 
-- [x] Создание поста (POST /posts)
-- [x] Получение поста по ID (GET /posts/{id})
-- [x] Получение ленты постов (GET /posts)
-- [x] Получение постов пользователя (GET /users/{id}/posts)
-- [x] Редактирование поста (PUT /posts/{id})
-- [x] Удаление поста (DELETE /posts/{id})
-- [x] Получение комментариев к посту (GET /posts/{id}/comments)
-- [x] Создание комментария (POST /posts/{id}/comments)
-- [ ] Лайк поста (POST /posts/{id}/like) - модель создана, API нужно добавить
-- [ ] Удаление лайка (DELETE /posts/{id}/like) - модель создана, API нужно добавить
-- [ ] Репост (POST /posts/{id}/repost) - модель создана, API нужно добавить
-- [ ] Удаление репоста (DELETE /posts/{id}/repost) - модель создана, API нужно добавить
-- [ ] Поиск постов (GET /posts/search)
-- [x] Интеграция с posts_db_api
+- [x] Create post (POST /posts)
+- [x] Get post by ID (GET /posts/{id})
+- [x] Fetch feed (GET /posts)
+- [x] Get posts by user (GET /users/{id}/posts)
+- [x] Update post (PUT /posts/{id})
+- [x] Delete post (DELETE /posts/{id})
+- [x] Fetch comments (GET /posts/{id}/comments)
+- [x] Create comment (POST /posts/{id}/comments)
+- [ ] Like post (POST /posts/{id}/like) – model exists, API pending
+- [ ] Remove like (DELETE /posts/{id}/like) – model exists, API pending
+- [ ] Repost (POST /posts/{id}/repost) – model exists, API pending
+- [ ] Remove repost (DELETE /posts/{id}/repost) – model exists, API pending
+- [ ] Search posts (GET /posts/search)
+- [x] Integration with posts_db_api
 
 #### ✅ 3.3. Users Service
 
-- [x] Получение профиля пользователя (GET /users/{id})
-- [x] Обновление профиля (PUT /users/{id})
-- [ ] Подписка на пользователя (POST /users/{id}/follow) - модель создана, API нужно добавить
-- [ ] Отписка от пользователя (DELETE /users/{id}/follow) - модель создана, API нужно добавить
-- [ ] Получение подписчиков (GET /users/{id}/followers) - модель создана, API нужно добавить
-- [ ] Получение подписок (GET /users/{id}/following) - модель создана, API нужно добавить
-- [x] Поиск пользователей (GET /users/search)
-- [x] Интеграция с users_db_api
+- [x] Get user profile (GET /users/{id})
+- [x] Update profile (PUT /users/{id})
+- [ ] Follow user (POST /users/{id}/follow) – model exists, API pending
+- [ ] Unfollow user (DELETE /users/{id}/follow) – model exists, API pending
+- [ ] Fetch followers (GET /users/{id}/followers) – model exists, API pending
+- [ ] Fetch following (GET /users/{id}/following) – model exists, API pending
+- [x] Search users (GET /users/search)
+- [x] Integration with users_db_api
 
-### ⏳ 4. Взаимодействия (Interactions)
+### ⏳ 4. Interactions
 
-#### ⏳ 4.1. Лайки
+#### ⏳ 4.1. Likes
 
-- [ ] Модель Likes в базе данных
-- [ ] API для лайков в posts_db_api
-- [ ] Логика лайков в posts_service
-- [ ] Подсчет лайков для постов
+- [ ] Database model
+- [ ] posts_db_api endpoints
+- [ ] posts_service logic
+- [ ] Post like counters
 
-#### ⏳ 4.2. Репосты
+#### ⏳ 4.2. Reposts
 
-- [ ] Модель Reposts в базе данных
-- [ ] API для репостов в posts_db_api
-- [ ] Логика репостов в posts_service
-- [ ] Подсчет репостов для постов
+- [ ] Database model
+- [ ] posts_db_api endpoints
+- [ ] posts_service logic
+- [ ] Post repost counters
 
-#### ⏳ 4.3. Подписки
+#### ⏳ 4.3. Follows
 
-- [ ] Модель Follows в базе данных
-- [ ] API для подписок в users_db_api
-- [ ] Логика подписок в users_service
-- [ ] Лента постов от подписок
+- [ ] Database model
+- [ ] users_db_api endpoints
+- [ ] users_service logic
+- [ ] Feed filtered by follows
 
-### ✅ 5. Безопасность и валидация
+### ✅ 5. Security & Validation
 
-- [x] Валидация входных данных (Pydantic)
-- [x] Обработка ошибок (HTTP exceptions)
+- [x] Input validation (Pydantic)
+- [x] Error handling (HTTP exceptions)
 - [ ] Rate limiting
-- [x] CORS настройки
-- [x] Валидация email и username
-- [x] Проверка прав доступа (только автор может редактировать/удалять пост)
-- [x] Защита от SQL injection (использование параметризованных запросов)
-- [x] Хеширование паролей
-- [x] Безопасное хранение токенов
+- [x] CORS configuration
+- [x] Email & username validation
+- [x] Access checks (only authors can edit/delete posts)
+- [x] SQL injection protection (parameterized queries)
+- [x] Password hashing
+- [x] Secure token storage
 
 ### ⏳ 6. API Gateway / Frontend
 
-#### ⏳ 6.1. API Gateway (опционально)
+#### ⏳ 6.1. API Gateway (optional)
 
-- [ ] Настройка API Gateway (Kong, Traefik, или простой FastAPI роутер)
-- [ ] Маршрутизация запросов к микросервисам
-- [ ] Агрегация данных из нескольких сервисов
-- [ ] Единая точка входа для клиентов
+- [ ] Configure gateway (Kong, Traefik, or FastAPI router)
+- [ ] Route requests to services
+- [ ] Aggregate data from multiple services
+- [ ] Provide a single entry point
 
-#### ⏳ 6.2. Frontend (опционально)
+#### ⏳ 6.2. Frontend (optional)
 
-- [ ] Выбор технологии (React, Vue, или простой HTML/JS)
-- [ ] Страница регистрации
-- [ ] Страница входа
-- [ ] Главная страница (лента постов)
-- [ ] Страница профиля
-- [ ] Страница создания поста
-- [ ] Компоненты для лайков, репостов, комментариев
+- [ ] Choose technology (React, Vue, or plain HTML/JS)
+- [ ] Registration page
+- [ ] Login page
+- [ ] Home feed
+- [ ] Profile page
+- [ ] Post composer
+- [ ] Components for likes, reposts, comments
 
-### ⏳ 7. Дополнительные функции
+### ⏳ 7. Additional Features
 
-- [ ] Пагинация для всех списков
-- [ ] Сортировка постов (по дате, популярности)
-- [ ] Фильтрация постов (по тегам, автору)
-- [ ] Загрузка медиа файлов (изображения, видео)
-- [ ] Уведомления (новые подписчики, лайки, комментарии)
-- [ ] Хештеги и поиск по хештегам
-- [ ] Упоминания пользователей (@username)
-- [ ] Ответы на посты (threads)
+- [ ] Pagination for all lists
+- [ ] Post sorting (by date, popularity)
+- [ ] Post filtering (by tags, author)
+- [ ] Media uploads (images, video)
+- [ ] Notifications (followers, likes, comments)
+- [ ] Hashtags & hashtag search
+- [ ] User mentions (@username)
+- [ ] Threaded replies
 
-### ⏳ 8. Тестирование
+### ⏳ 8. Testing
 
-- [ ] Unit тесты для репозиториев
-- [ ] Unit тесты для сервисов
-- [ ] Integration тесты для API
-- [ ] Тесты аутентификации
-- [ ] Тесты безопасности
+- [ ] Unit tests for repositories
+- [ ] Unit tests for services
+- [ ] API integration tests
+- [ ] Authentication tests
+- [ ] Security tests
 
-### ⏳ 9. Документация
+### ⏳ 9. Documentation
 
-- [ ] README с описанием проекта
-- [ ] API документация (Swagger/OpenAPI)
-- [ ] Инструкции по запуску
-- [ ] Описание архитектуры
-- [ ] Примеры использования API
+- [ ] README with project overview
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Runbook / setup guide
+- [ ] Architecture description
+- [ ] API usage examples
 
-### ✅ 10. DevOps и деплой
+### ✅ 10. DevOps & Deployment
 
-- [x] Полная настройка docker-compose.yml
-- [x] Переменные окружения (.env файл)
-- [x] Health checks для всех сервисов
-- [ ] Логирование (базовое)
-- [ ] Мониторинг (опционально)
-- [ ] CI/CD pipeline (опционально)
+- [x] Complete `docker-compose.yml`
+- [x] Environment variables (`.env`)
+- [x] Health checks for all services
+- [ ] Basic logging
+- [ ] Monitoring (optional)
+- [ ] CI/CD pipeline (optional)
 
-## Текущий статус
+## Current Status
 
-### Выполнено ✅
+### Completed ✅
 
-- Базовая структура проекта
-- Модели данных (Users, Posts, Tokens)
-- Репозитории для всех сущностей
-- Сервисы для всех сущностей
-- API эндпоинты для всех db_apis
-- Базовая настройка Docker (частично)
+- Base project structure
+- Data models (Users, Posts, Tokens)
+- Repositories for all entities
+- Services for all entities
+- API endpoints for every db_api
+- Initial Docker setup (partial)
 
-### В процессе ⏳
+### In progress ⏳
 
-- Настройка docker-compose.yml
-- Реализация бизнес-логики в сервисах
+- docker-compose orchestration
+- Business logic implementation in services
 
-### Не начато ⏳
+### Not started ⏳
 
-- Аутентификация (JWT, пароли)
-- Взаимодействия (лайки, репосты, подписки)
+- Additional auth hardening (JWT, password flows)
+- Interaction features (likes, reposts, follows)
 - Frontend
-- Тестирование
-- Документация
+- Testing
+- Documentation polish
 
-## Как запустить
+## Getting Started
 
-### Требования
-- Docker и Docker Compose
-- Python 3.13+ (для локальной разработки)
+### Requirements
+- Docker & Docker Compose
+- Python 3.13+ (for local development)
 
-### Настройка
+### Setup
 
-1. Создайте файл `.env` в корне проекта (можно скопировать из `.env.example`):
+1. Create a `.env` file in the project root (copy from `.env.example` if needed):
 ```bash
 # Database credentials
 DB_USER=postgres
@@ -240,53 +240,53 @@ ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=30
 ```
 
-2. Запустите все сервисы:
+2. Start every service:
 ```bash
-# Запуск всех сервисов
+# Launch stack
 docker-compose up -d
 
-# Проверка статуса
+# Check status
 docker-compose ps
 
-# Просмотр логов
+# Tail logs
 docker-compose logs -f
 
-# Остановка всех сервисов
+# Stop everything
 docker-compose down
 ```
 
 ### API Endpoints
 
-После запуска доступны следующие сервисы:
+Available services after startup:
 
 **Auth Service (http://localhost:8004)**
-- `POST /api/v1/auth/register` - Регистрация
-- `POST /api/v1/auth/login` - Вход
-- `POST /api/v1/auth/refresh` - Обновление токена
-- `POST /api/v1/auth/logout` - Выход
-- `GET /api/v1/auth/me` - Информация о текущем пользователе
+- `POST /api/v1/auth/register` – register a user
+- `POST /api/v1/auth/login` – log in
+- `POST /api/v1/auth/refresh` – refresh tokens
+- `POST /api/v1/auth/logout` – log out
+- `GET /api/v1/auth/me` – current user info
 
 **Posts Service (http://localhost:8005)**
-- `POST /api/v1/posts` - Создание поста
-- `GET /api/v1/posts/{id}` - Получение поста
-- `GET /api/v1/posts` - Лента постов
-- `GET /api/v1/users/{id}/posts` - Посты пользователя
-- `PUT /api/v1/posts/{id}` - Обновление поста
-- `DELETE /api/v1/posts/{id}` - Удаление поста
-- `GET /api/v1/posts/{id}/comments` - Комментарии к посту
-- `POST /api/v1/posts/{id}/comments` - Создание комментария
+- `POST /api/v1/posts` – create a post
+- `GET /api/v1/posts/{id}` – fetch a post
+- `GET /api/v1/posts` – get the feed
+- `GET /api/v1/users/{id}/posts` – posts by user
+- `PUT /api/v1/posts/{id}` – update a post
+- `DELETE /api/v1/posts/{id}` – delete a post
+- `GET /api/v1/posts/{id}/comments` – fetch comments
+- `POST /api/v1/posts/{id}/comments` – create comment
 
 **Users Service (http://localhost:8006)**
-- `GET /api/v1/users/{id}` - Профиль пользователя
-- `PUT /api/v1/users/{id}` - Обновление профиля
-- `GET /api/v1/users/search?q=query` - Поиск пользователей
+- `GET /api/v1/users/{id}` – user profile
+- `PUT /api/v1/users/{id}` – update profile
+- `GET /api/v1/users/search?q=query` – search users
 
-Все эндпоинты имеют автоматическую документацию Swagger UI:
-- http://localhost:8004/docs - Auth Service
-- http://localhost:8005/docs - Posts Service
-- http://localhost:8006/docs - Users Service
+Swagger UI is available for every service:
+- http://localhost:8004/docs – Auth Service
+- http://localhost:8005/docs – Posts Service
+- http://localhost:8006/docs – Users Service
 
-## Порты
+## Ports
 
 - auth_db_api: 8001
 - posts_db_api: 8002
@@ -295,11 +295,68 @@ docker-compose down
 - posts_service: 8005
 - users_service: 8006
 
-## Технологии
+## Tech Stack
 
 - Python 3.13+
 - FastAPI
 - SQLAlchemy (async)
 - PostgreSQL
 - Docker & Docker Compose
-- Pydantic (валидация)
+- Pydantic (validation)
+
+## Remote-style training environment
+
+To practice deploying the databases and services onto “separate servers”, spin up the lightweight SSH-ready hosts defined in `docker-compose.remote.yml`.
+
+1. Build and start the hosts:
+   ```bash
+   docker compose -f docker-compose.remote.yml up -d
+   ```
+   You will get seven containers:
+   - `auth_db_host`, `posts_db_host`, `users_db_host` – empty Debian boxes for database work
+   - `auth_service_host`, `posts_service_host`, `users_service_host` – empty Debian boxes intended for the FastAPI services
+   - `bastion` – helper box that is connected to the services network
+
+2. Each host exposes SSH on a different local port (2222–2228). Example:
+   ```bash
+   ssh dev@localhost -p 2226    # connects to auth_service_host
+   ```
+   Default credentials: `dev` / `dev`. The user has passwordless sudo rights so you can install PostgreSQL, uvicorn, etc. exactly like on a remote VM.
+
+3. Containers start empty. Use the helper scripts under `scripts/` to copy code or database dumps into a host once you decide it is ready:
+   ```bash
+   # Copy the auth service code into /srv/app/auth_service on auth_service_host (port 2226)
+   scripts/push-service.sh ./auth_service 2226 /srv/app
+
+   # Upload a SQL dump to auth_db_host (port 2223) and run it through psql
+   scripts/push-sql.sh ./seed.sql 2223 "postgresql://postgres:postgres@localhost:5432/postgres"
+   ```
+
+4. Bring databases/services up manually inside the target host (e.g., `sudo apt-get install postgresql`, `python -m venv /srv/app/venv`, `uv run uvicorn src.main:app --host 0.0.0.0 --port 8000`). Because there are no bind mounts, nothing is shared automatically with your local tree—the workflow mimics copying artifacts onto a completely separate server.
+
+5. When you are done experimenting, tear everything down:
+   ```bash
+   docker compose -f docker-compose.remote.yml down -v
+   ```
+
+This remote-style topology keeps the original `docker-compose.yml` (fully managed stack) intact while giving you an isolated lab for learning how to push code and data to independent servers.
+
+### Автоматизация деплоя сервисов
+
+Чтобы не выполнять все шаги вручную, можно воспользоваться скриптом `scripts/deploy-service.sh`. Он заходит на выбранный “сервер”, устанавливает Python-зависимости, синхронизирует исходники и запускает uvicorn в отдельной tmux-сессии.
+
+```bash
+# Деплой auth_service на хост, слушающий порт 2226
+scripts/deploy-service.sh ./auth_service 2226 /srv/services 8000 ./auth_service/.env
+
+# Проверить логи
+ssh dev@localhost -p 2226 'tmux attach -t auth_service'
+```
+
+Скрипт:
+1. Ставит на удалённую машину `python3-venv`, `pipx`, `tmux`, `uv`.
+2. Копирует проект через `rsync` и при необходимости `.env`.
+3. Создаёт виртуальное окружение, ставит зависимости через `uv pip install -e .`.
+4. Перезапускает сервис в tmux-сессии `<имя_папки>`.
+
+Аналогично можно дописать скрипты для деплоя БД (например, запуск `push-sql.sh`) или вынести всё в Ansible-плейбук, если захочется полноценной оркестрации.

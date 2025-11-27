@@ -4,13 +4,13 @@ from src.config import Settings
 
 
 class PostsDBClient:
-    """HTTP клиент для работы с posts_db_api"""
+    """HTTP client for interacting with posts_db_api"""
 
     BASE_URL = Settings.POSTS_DB_API_URL
 
     @staticmethod
     async def create_post(post_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Создает новый пост"""
+        """Creates a new post"""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{PostsDBClient.BASE_URL}/api/v1/posts", json=post_data, timeout=10.0
@@ -20,7 +20,7 @@ class PostsDBClient:
 
     @staticmethod
     async def get_post(post_id: int) -> Optional[Dict[str, Any]]:
-        """Получает пост по ID"""
+        """Retrieves a post by ID"""
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(
@@ -34,12 +34,12 @@ class PostsDBClient:
 
     @staticmethod
     async def get_posts(
-        author_id: Optional[int] = None,
-        parent_post_id: Optional[int] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
+        author_id: int | None = None,
+        parent_post_id: int | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> List[Dict[str, Any]]:
-        """Получает список постов с фильтрацией"""
+        """Retrieves a filtered list of posts"""
         async with httpx.AsyncClient() as client:
             params = {}
             if author_id:
@@ -62,7 +62,7 @@ class PostsDBClient:
 
     @staticmethod
     async def get_comments(post_id: int) -> List[Dict[str, Any]]:
-        """Получает комментарии к посту"""
+        """Retrieves comments for a post"""
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(
@@ -77,7 +77,7 @@ class PostsDBClient:
 
     @staticmethod
     async def delete_post(post_id: int) -> bool:
-        """Удаляет пост (помечает как is_deleted=True)"""
+        """Deletes a post (marks it as is_deleted=True)"""
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.delete(
@@ -90,13 +90,13 @@ class PostsDBClient:
 
 
 class UsersDBClient:
-    """HTTP клиент для работы с users_db_api"""
+    """HTTP client for interacting with users_db_api"""
 
     BASE_URL = Settings.USERS_DB_API_URL
 
     @staticmethod
     async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
-        """Получает пользователя по ID"""
+        """Retrieves a user by ID"""
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(

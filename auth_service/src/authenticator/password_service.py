@@ -2,37 +2,37 @@ from passlib.context import CryptContext
 from src.config import Settings
 
 
-# Создаем контекст для хеширования паролей
+# Create a hashing context for passwords
 pwd_context = CryptContext(schemes=[Settings.PASSWORD_HASH_ALGORITHM], deprecated="auto")
 
 
 class PasswordService:
-    """Сервис для работы с паролями (хеширование и проверка)"""
+    """Password utilities (hashing and verification)"""
     
     @staticmethod
     def hash_password(password: str) -> str:
         """
-        Хеширует пароль с использованием bcrypt
+        Hashes a password using bcrypt
         
         Args:
-            password: Пароль в открытом виде
+            password: Plain-text password
         
         Returns:
-            Хешированный пароль
+            Hashed password
         """
         return pwd_context.hash(password)
     
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
-        Проверяет, соответствует ли пароль хешу
+        Checks whether a password matches its hash
         
         Args:
-            plain_password: Пароль в открытом виде
-            hashed_password: Хешированный пароль из базы данных
+            plain_password: Plain-text password
+            hashed_password: Hashed password from storage
         
         Returns:
-            True, если пароль верный, иначе False
+            True if the password matches, otherwise False
         """
         return pwd_context.verify(plain_password, hashed_password)
 

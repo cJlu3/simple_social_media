@@ -4,23 +4,23 @@ from pydantic import BaseModel, Field, EmailStr
 
 
 class UserUpdateSchema(BaseModel):
-    """Схема для обновления профиля пользователя"""
+    """Schema for updating a user profile"""
 
     username: Optional[str] = Field(None, min_length=3, max_length=50)
-    avatar_url: Optional[str] = None
-    birth_date: Optional[datetime] = None
+    avatar_url: str | None = None
+    birth_date: datetime | None = None
 
 
 class UserSchema(BaseModel):
-    """Схема пользователя для ответа"""
+    """User schema for responses"""
 
     id: int
     username: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     email: str
     created_at: datetime
-    disactivated_at: Optional[datetime] = None
-    birth_date: Optional[datetime] = None
+    disactivated_at: datetime | None = None
+    birth_date: datetime | None = None
     is_verified: bool
     is_admin: bool
     followers_count: int = 0
@@ -30,7 +30,7 @@ class UserSchema(BaseModel):
 
 
 class FollowSchema(BaseModel):
-    """Схема подписки"""
+    """Follow schema"""
 
     follower_id: int
     following_id: int

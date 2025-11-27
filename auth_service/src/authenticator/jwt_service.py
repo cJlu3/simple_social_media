@@ -5,19 +5,19 @@ from src.config import Settings
 
 
 class JWTService:
-    """Сервис для работы с JWT токенами"""
+    """Service for working with JWT tokens"""
     
     @staticmethod
-    def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    def create_access_token(data: Dict[str, Any], expires_delta: timedelta | None = None) -> str:
         """
-        Создает JWT access token
+        Creates a JWT access token
         
         Args:
-            data: Данные для включения в токен (обычно user_id, username, email)
-            expires_delta: Время жизни токена. Если не указано, используется значение из настроек
+            data: Data to embed in the token (user_id, username, email, etc.)
+            expires_delta: Token lifetime. Defaults to the settings value.
         
         Returns:
-            Закодированный JWT токен
+            Encoded JWT token
         """
         to_encode = data.copy()
         
@@ -33,13 +33,13 @@ class JWTService:
     @staticmethod
     def create_refresh_token(data: Dict[str, Any]) -> str:
         """
-        Создает JWT refresh token с более длительным сроком жизни
+        Creates a JWT refresh token with a longer lifetime
         
         Args:
-            data: Данные для включения в токен
+            data: Data to embed in the token
         
         Returns:
-            Закодированный JWT refresh token
+            Encoded JWT refresh token
         """
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(days=Settings.REFRESH_TOKEN_EXPIRE_DAYS)
@@ -50,19 +50,19 @@ class JWTService:
     @staticmethod
     def verify_token(token: str, token_type: str = "access") -> Optional[Dict[str, Any]]:
         """
-        Проверяет и декодирует JWT токен
+        Verifies and decodes a JWT token
         
         Args:
-            token: JWT токен для проверки
-            token_type: Тип токена ("access" или "refresh")
+            token: JWT token to verify
+            token_type: Token type ("access" or "refresh")
         
         Returns:
-            Декодированные данные токена или None, если токен невалиден
+            Decoded payload or None if the token is invalid
         """
         try:
             payload = jwt.decode(token, Settings.JWT_SECRET_KEY, algorithms=[Settings.JWT_ALGORITHM])
             
-            # Проверяем тип токена
+            # Ensure token type matches
             if payload.get("type") != token_type:
                 return None
             
@@ -73,13 +73,13 @@ class JWTService:
     @staticmethod
     def get_user_id_from_token(token: str) -> Optional[int]:
         """
-        Извлекает user_id из токена
+        Extracts user_id from a token
         
         Args:
-            token: JWT токен
+            token: JWT token
         
         Returns:
-            user_id или None, если токен невалиден
+            user_id or None if the token is invalid
         """
         payload = JWTService.verify_token(token)
         if payload:
